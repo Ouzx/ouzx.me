@@ -1,0 +1,22 @@
+{
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3"
+  },
+  "name": "ouzx.me",
+  "author": "Ouzx",
+  "license": "MIT",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "engines": {
+    "node": ">=18"
+  }
+}
