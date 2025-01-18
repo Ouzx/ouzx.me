@@ -1,0 +1,11 @@
+import createConfig from "./create-config.js";
+import drizzle from "eslint-plugin-drizzle";
+
+
+export default createConfig({}, {
+    ignores: ["src/db/migrations/*", "public/*"],
+    plugins: { drizzle },
+    rules: {
+        ...drizzle.configs.recommended.rules,
+    },
+});
