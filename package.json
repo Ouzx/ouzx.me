@@ -2,8 +2,9 @@
   "name": "ouzx.me",
   "version": "0.0.1",
   "scripts": {
-    "dev": "turbo run dev",
     "build": "turbo run build",
+    "start": "turbo run start",
+    "dev": "turbo run dev",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
