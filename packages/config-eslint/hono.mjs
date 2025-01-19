@@ -1,4 +1,4 @@
-import createConfig from "./create-config.js";
+import createConfig from "./create-config.mjs";
 import drizzle from "eslint-plugin-drizzle";
 
 
