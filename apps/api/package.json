@@ -1,0 +1,35 @@
+{
+  "name": "@ouzx-me/api",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Ouzx",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "echo 'No tests yet'",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.17"
+  },
+  "devDependencies": {
+    "@ouzx-me/eslint-config": "workspace:*",
+    "@ouzx-me/typescript-config": "workspace:*",
+    "@types/node": "^20",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^9.18.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  },
+  "lint-staged": {
+    "*": ["eslint --fix"],
+    "*.{ts,tsx}": ["tsc --noEmit"]
+  }
+}
