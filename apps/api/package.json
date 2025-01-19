@@ -22,14 +22,15 @@
     "@ouzx-me/eslint-config": "workspace:*",
     "@ouzx-me/typescript-config": "workspace:*",
     "@types/node": "^20",
-    "@typescript-eslint/eslint-plugin": "^8.20.0",
-    "@typescript-eslint/parser": "^8.20.0",
-    "eslint": "^9.18.0",
     "tsx": "^4.19.2",
     "typescript": "^5"
   },
   "lint-staged": {
-    "*": ["eslint --fix"],
-    "*.{ts,tsx}": ["tsc --noEmit"]
+    "*": [
+      "eslint --fix"
+    ],
+    "*.{ts,tsx}": [
+      "tsc --noEmit"
+    ]
   }
 }
