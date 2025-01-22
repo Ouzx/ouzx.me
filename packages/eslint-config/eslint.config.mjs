@@ -1,3 +1,7 @@
-import createConfig from "./create-config.js";
+import createConfig from './create-config.mjs';
 
-export default createConfig();
+export default createConfig({}, {
+  rules: {
+    'perfectionist/sort-imports': 'off',
+  },
+});
