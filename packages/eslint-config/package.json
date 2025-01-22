@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./eslint.config.mjs",
-    "./create-config": "./create-config.mjs",
+    "./create-config": {
+      "types": "./create-config.d.ts",
+      "default": "./create-config.mjs"
+    },
     "./hono": "./hono.mjs",
     "./next": "./next.mjs"
   },
