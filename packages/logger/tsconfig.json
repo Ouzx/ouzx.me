@@ -5,7 +5,7 @@
     "paths": {
       "@/logger/*": ["./src/*"]
     },
-    "outDir": "./dist"
+    "noEmit": true
   },
   "include": ["."],
   "exclude": ["node_modules", "dist"]
