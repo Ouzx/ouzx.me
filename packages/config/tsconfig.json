@@ -1,0 +1,11 @@
+{
+  "extends": "@ouzx-me/typescript-config/base.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/config/*": ["./src/*"]
+    },
+    "noEmit": true
+  },
+  "exclude": ["node_modules"]
+}

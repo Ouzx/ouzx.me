@@ -1,0 +1,104 @@
+# Development
+.yarn/
+!.yarn/releases
+!.vscode/launch.json
+!.vscode/*.code-snippets
+.idea/
+.cache
+.temp
+.docusaurus
+.turbo
+
+
+# Dependencies
+node_modules
+jspm_packages
+bower_components
+web_modules
+
+# Environment
+.env
+.env.*
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist
+build
+.next
+out
+.nuxt
+.vuepress/dist
+.serverless
+.fusebox
+.dynamodb
+
+# Caches
+.npm
+.eslintcache
+.stylelintcache
+.rpt2_cache
+.rts2_cache_cjs
+.rts2_cache_es
+.rts2_cache_umd
+.parcel-cache
+
+# Testing
+coverage
+.nyc_output
+.vscode-test
+
+# Compiled files
+*.tsbuildinfo
+lib-cov
+
+# Miscellaneous
+.DS_Store
+*.tgz
+.yarn-integrity
+.node_repl_history
+*.pid
+*.seed
+*.pid.lock
+.lock-wscript
+.tern-port
+pids
+.grunt
+
+# Databases
+dev.db
+test.db
+
+# Specific to your project
+.vercel
+setup.cfg
+setup_dev.cfg
+setup_prod.cfg
+
+# Yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+
+test-results
+playwright-report
+blob-report
+playwright/.cache/
