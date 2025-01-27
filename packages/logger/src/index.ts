@@ -1,5 +1,9 @@
+import { config, Environment } from '@ouzx-me/config';
 import pino, { type Logger } from 'pino';
 import pretty from 'pino-pretty';
+
+const PROD = config.env === Environment.PROD;
+const TEST = config.env === Environment.TEST;
 
 export type LoggerConfig = {
   level?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
@@ -10,13 +14,10 @@ export type LoggerConfig = {
   stream?: pino.DestinationStream;
 };
 
-// TODO: Update here, use @ouzx-me/config
 const defaultConfig: LoggerConfig = {
   level: 'info',
-  // eslint-disable-next-line turbo/no-undeclared-env-vars, node/no-process-env
-  enabled: process.env.NODE_ENV !== 'test',
-  // eslint-disable-next-line turbo/no-undeclared-env-vars, node/no-process-env
-  prettyPrint: process.env.NODE_ENV !== 'production',
+  enabled: !TEST,
+  prettyPrint: !PROD,
   redactedKeys: ['password', 'token', 'secret'],
   customTimestamp: true,
 };

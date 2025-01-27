@@ -32,6 +32,12 @@ importers:
       '@hono/node-server':
         specifier: ^1.13.7
         version: 1.13.7(hono@4.6.17)
+      '@ouzx-me/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@ouzx-me/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       hono:
         specifier: ^4.6.17
         version: 4.6.17
@@ -39,9 +45,6 @@ importers:
       '@ouzx-me/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@ouzx-me/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
       '@ouzx-me/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
@@ -100,9 +103,6 @@ importers:
 
   packages/config:
     dependencies:
-      '@types/node':
-        specifier: ^20
-        version: 20.17.14
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -113,6 +113,9 @@ importers:
       '@ouzx-me/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/node':
+        specifier: ^20
+        version: 20.17.14
       eslint:
         specifier: ^9.17.0
         version: 9.18.0(jiti@2.4.2)
@@ -143,6 +146,9 @@ importers:
 
   packages/logger:
     dependencies:
+      '@ouzx-me/config':
+        specifier: workspace:*
+        version: link:../config
       pino:
         specifier: ^9.6.0
         version: 9.6.0
@@ -156,6 +162,9 @@ importers:
       '@ouzx-me/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/node':
+        specifier: ^20
+        version: 20.17.14
       eslint:
         specifier: ^9.17.0
         version: 9.18.0(jiti@2.4.2)
