@@ -9,7 +9,8 @@
     "test": "echo 'No tests yet'",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf .next"
+    "clean": "rm -rf .next",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "next": "15.1.5",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@ouzx-me/eslint-config": "workspace:*",
     "@ouzx-me/typescript-config": "workspace:*",
+    "@playwright/test": "^1.50.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

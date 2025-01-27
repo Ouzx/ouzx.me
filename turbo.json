@@ -19,6 +19,11 @@
         "outputs": [],
         "dependsOn": []
     },
+    "e2e": {
+      "cache": false,
+      "outputs": [],
+      "dependsOn": []
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },
