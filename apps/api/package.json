@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@ouzx-me/eslint-config": "workspace:*",
+    "@ouzx-me/logger": "workspace:*",
     "@ouzx-me/typescript-config": "workspace:*",
     "@types/node": "^20",
     "eslint": "^9.17.0",
@@ -31,7 +32,7 @@
       "eslint --fix"
     ],
     "*.{ts,tsx}": [
-      "tsc --noEmit"
+      "sh -c 'tsc --noEmit'"
     ]
   }
 }

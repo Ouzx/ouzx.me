@@ -1,11 +1,10 @@
 import { serve } from '@hono/node-server';
+import { logger } from '@ouzx-me/logger';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
 
 const app = new Hono();
 
-app.use('*', logger());
 app.use('*', cors());
 
 app.get('/', (c) => {
@@ -25,8 +24,7 @@ app.get('/health', (c) => {
 // eslint-disable-next-line turbo/no-undeclared-env-vars, node/no-process-env
 const port = process.env.PORT || 3001;
 
-// eslint-disable-next-line no-console
-console.log(`Server is running on port ${port}`);
+logger.info(`Server is running on port ${port}`);
 
 serve({
   fetch: app.fetch,

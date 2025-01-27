@@ -39,6 +39,9 @@ importers:
       '@ouzx-me/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
+      '@ouzx-me/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@ouzx-me/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
