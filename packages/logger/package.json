@@ -1,9 +1,9 @@
 {
   "name": "@ouzx-me/logger",
+  "type": "module",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/index.ts",
     "test": "vitest",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
@@ -16,7 +16,6 @@
     "@ouzx-me/eslint-config": "workspace:*",
     "@ouzx-me/typescript-config": "workspace:*",
     "eslint": "^9.17.0",
-    "tsx": "^4.19.2",
     "typescript": "^5",
     "vitest": "^3.0.2"
   },
@@ -25,7 +24,7 @@
       "eslint --fix"
     ],
     "*.{ts,tsx}": [
-      "tsc --noEmit"
+      "sh -c 'tsc --noEmit'"
     ]
   }
 }
