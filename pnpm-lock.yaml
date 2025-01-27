@@ -98,6 +98,28 @@ importers:
         specifier: ^5
         version: 5.7.3
 
+  packages/config:
+    dependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.17.14
+      zod:
+        specifier: 3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@ouzx-me/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@ouzx-me/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      eslint:
+        specifier: ^9.17.0
+        version: 9.18.0(jiti@2.4.2)
+      typescript:
+        specifier: ^5
+        version: 5.7.3
+
   packages/eslint-config:
     devDependencies:
       '@antfu/eslint-config':
@@ -3518,6 +3540,9 @@ packages:
   yocto-queue@1.1.1:
     resolution: {integrity: sha512-b4JR1PFR10y1mKjhHY9LaGo6tmrgjit7hxVIeAmyMw3jegXR4dhYqLaQF5zMXZxY7tLpMyJeLjr1C4rLmkVe8g==}
     engines: {node: '>=12.20'}
+
+  zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -7053,5 +7078,7 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yocto-queue@1.1.1: {}
+
+  zod@3.22.4: {}
 
   zwitch@2.0.4: {}
