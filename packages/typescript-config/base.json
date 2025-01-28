@@ -15,7 +15,6 @@
     "noUnusedParameters": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-
     "composite": false,
     "declaration": true,
     "declarationMap": true,
@@ -24,5 +23,7 @@
     "preserveWatchOutput": true,
     "strictNullChecks": true
   },
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
