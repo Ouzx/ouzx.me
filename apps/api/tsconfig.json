@@ -5,8 +5,11 @@
     "paths": {
       "@/api/*": ["./src/*"]
     },
+    "types": [
+      "vitest/globals",
+      "@cloudflare/workers-types/2023-07-01"
+    ],
     "outDir": "./dist"
   },
-  "include": ["."],
   "exclude": ["node_modules", "dist"]
 }

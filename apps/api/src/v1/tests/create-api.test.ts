@@ -1,8 +1,6 @@
 // TODO: Remove this file after initializing the project
-
 import { Hono } from 'hono';
 import { testClient } from 'hono/testing';
-import { expect, it } from 'vitest';
 
 it('api Test', async () => {
   const app = new Hono().get('/search', c =>
