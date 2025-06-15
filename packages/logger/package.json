@@ -26,11 +26,11 @@
     "vitest": "^3.2.3"
   },
   "lint-staged": {
-    "*": [
-      "eslint --fix"
+    "*.{js,jsx,ts,tsx,html,md,json,jsonc,yml,yaml,toml,xml,css,postcss}": [
+      "pnpm run lint:fix"
     ],
     "*.{ts,tsx}": [
-      "sh -c 'tsc --noEmit'"
+      "pnpm run typecheck"
     ]
   }
 }
