@@ -1,84 +1,157 @@
-# Turborepo starter
+# ouzx.me - Edge-First Personal Blog Platform
 
-This Turborepo starter is maintained by the Turborepo core team.
+A modern, high-performance personal blog platform built with Next.js and Hono, leveraging Cloudflare's infrastructure for optimal content delivery and edge computing capabilities.
 
-## Using this example
+## 📑 Table of Contents
 
-Run the following command:
+- [Vision & Purpose](#-vision--purpose)
+- [Technical Foundation](#-technical-foundation)
+- [Project Philosophy](#-project-philosophy)
+- [Development Approach](#-development-approach)
+- [Core Features](#core-features)
+- [Dependencies](#dependencies)
+  - [Frontend (Web)](#frontend-web)
+  - [Backend (API)](#backend-api)
+  - [Media & Content](#media--content)
+  - [Development & Testing](#development--testing)
+- [Project Structure](#project-structure)
+- [Available Scripts](#available-scripts)
+  - [Development](#development)
+  - [Database](#database)
+  - [Testing & Linting](#testing--linting)
+  - [Git Workflow](#git-workflow)
+  - [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
 
-```sh
-npx create-turbo@latest
+## 🎯 Vision & Purpose
+
+This project represents more than just a blog platform—it's an educational journey from a functional blog (ozxk-dev) to an ambitious edge-native application (ouzx.me). Built with transparency at its core, it serves as:
+
+- 📚 A learning resource for enterprise-grade architecture
+- 🔬 A living laboratory for modern development practices
+- 🌐 A showcase of edge-native capabilities
+- 🤝 An open platform for collaboration and knowledge sharing
+
+## 🏗️ Technical Foundation
+
+- **Frontend**: Next.js with TypeScript
+- **Backend**: Hono
+- **Infrastructure**: Cloudflare Edge
+- **Package Management**: pnpm and turborepo (Monorepo structure)
+- **Project Management**: GitHub Projects
+
+## 💡 Project Philosophy
+
+This platform is built as an open learning experience, documenting the entire journey from conception to implementation. Every decision, challenge, and solution is transparently shared, making it a valuable resource for developers interested in:
+
+- Edge computing architecture
+- Modern JavaScript frameworks
+- Enterprise-grade development practices
+- Project management methodologies
+- Open-source collaboration
+
+## 🔄 Development Approach
+
+The project follows a systematic, educational approach where:
+
+- Each feature addition is properly documented
+- Development decisions are explained
+- Best practices are demonstrated
+- Real-world patterns are prioritized over theoretical implementations
+- Community collaboration is encouraged
+
+The entire development process, including project management and documentation, is open source, allowing developers to:
+
+- Follow along with the development journey
+- Understand architectural decisions
+- Learn from practical implementations
+- Contribute to the platform's evolution
+
+---
+
+---
+
+## Core Features
+
+TBD
+
+## Dependencies
+
+### Frontend (Web)
+
+TBD
+
+### Backend (API)
+
+TBD
+
+### Media & Content
+
+TBD
+
+### Development & Testing
+
+TBD
+
+## Project Structure
+
+```
+📦 ouzx.me
+├── 📂 apps
+│ ├── 📂 web
+│ └── 📂 api
+├── 📂 packages
+│ ├── 📂 config
+│ ├── 📂 logger
+│ ├── 📂 eslint-config
+│ └── 📂 typescript-config
+├── 📂 .github
+├── 📂 .husky
+└── 📂 docs
 ```
 
-## What's inside?
+## Available Scripts
 
-This Turborepo includes the following packages/apps:
+### Development
 
-### Apps and Packages
+- `dev`: Run development environment
+- `build`: Build all applications
+- `start`: Start production environment
+- `test`: Run test suite
+- `lint`: Check code style
+- `typecheck`: Run type checking
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Database
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+TBD
 
-### Utilities
+### Testing & Linting
 
-This Turborepo has some additional tools already setup for you:
+TBD
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### Git Workflow
 
-### Build
+TBD
 
-To build all apps and packages, run the following command:
+### Deployment
 
-```
-cd my-turborepo
-pnpm build
-```
+TBD
 
-### Develop
+## Contributing
 
-To develop all apps and packages, run the following command:
+1. Fork the repository
+2. Create your feature branch
+3. Commit changes using conventional commits
+4. Push to the branch
+5. Open a Pull Request
+   TBD
 
-```
-cd my-turborepo
-pnpm dev
-```
+## License
 
-### Remote Caching
+MIT License - see [LICENSE](LICENSE) for details
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## Author
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+Oguzhan Kandakoglu - [@ouzx](https://github.com/ouzx)

@@ -21,8 +21,6 @@
     "@ouzx-me/eslint-config": "workspace:*",
     "@ouzx-me/typescript-config": "workspace:*",
     "@types/node": "^24.0.1",
-    "eslint": "^9.29.0",
-    "typescript": "5.8.2",
     "vitest": "^3.2.3"
   }
 }

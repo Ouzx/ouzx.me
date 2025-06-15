@@ -1,6 +1,13 @@
 {
   "name": "ouzx.me",
   "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "author": "Ouzx",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "turbo run build",
     "start": "turbo run start",
@@ -8,18 +15,19 @@
     "test": "turbo run test",
     "e2e": "turbo run e2e",
     "typecheck": "turbo run typecheck",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint -- --fix",
+    "lint": "turbo run lint -- --fix",
     "fix": "turbo run fix",
-    "clean": "turbo run clean",
     "prepare": "husky",
     "commit": "git add -A && cz",
     "commit:stage": "cz"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
+    "@ouzx-me/eslint-config": "workspace:*",
+    "@ouzx-me/typescript-config": "workspace:*",
     "commitizen": "^4.3.1",
     "cz-emoji": "1.3.2-canary.2",
+    "eslint": "^9.29.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "turbo": "^2.5.4",
@@ -37,19 +45,17 @@
       ]
     }
   },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,html,md,json,jsonc,yml,yaml,toml,xml,css,postcss}": [
-      "pnpm run lint:fix"
-    ],
-    "*.{ts,tsx}": [
-      "pnpm run typecheck"
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
     ]
   },
-  "author": "Ouzx",
-  "license": "MIT",
-  "private": true,
-  "packageManager": "pnpm@10.0.0",
-  "engines": {
-    "node": ">=18"
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,html,md,json,jsonc,yml,yaml,toml,xml,css,postcss}": [
+      "pnpm run lint --"
+    ],
+    "*.{ts,tsx}": [
+      "sh -c 'tsc --noEmit'"
+    ]
   }
 }

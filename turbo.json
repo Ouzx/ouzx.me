@@ -3,21 +3,21 @@
   "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": [],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "start": {
-      "cache": false,
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": false
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "test": {
-        "cache": false,
-        "outputs": [],
-        "dependsOn": []
+      "cache": false,
+      "outputs": [],
+      "dependsOn": []
     },
     "e2e": {
       "cache": false,
@@ -25,14 +25,14 @@
       "dependsOn": []
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": []
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": []
     },
     "fix": {
       "dependsOn": ["lint", "typecheck"],
       "outputs": []
     }
   }
-} 
+}

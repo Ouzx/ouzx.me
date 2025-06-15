@@ -17,10 +17,8 @@
   "devDependencies": {
     "@antfu/eslint-config": "^4.14.1",
     "@next/eslint-plugin-next": "^15.3.3",
-    "eslint": "^9.29.0",
     "eslint-plugin-drizzle": "^0.2.3",
     "eslint-plugin-format": "^1.0.1",
-    "eslint-plugin-next-on-pages": "^1.13.12",
     "eslint-plugin-turbo": "^2.5.4"
   }
 }

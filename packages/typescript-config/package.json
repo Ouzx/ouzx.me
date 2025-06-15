@@ -2,7 +2,13 @@
   "name": "@ouzx-me/typescript-config",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "lint": "eslint ."
+  },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@ouzx-me/eslint-config": "workspace:*"
   }
 }
