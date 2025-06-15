@@ -10,6 +10,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
+    "fix": "turbo run fix",
     "clean": "turbo run clean",
     "prepare": "husky",
     "commit": "git add -A && cz",

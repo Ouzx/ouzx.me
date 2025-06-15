@@ -29,6 +29,10 @@
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]
+    },
+    "fix": {
+      "dependsOn": ["lint", "typecheck"],
+      "outputs": []
     }
   }
 } 

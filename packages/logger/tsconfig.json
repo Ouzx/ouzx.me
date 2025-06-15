@@ -1,0 +1,11 @@
+{
+  "extends": "@ouzx-me/typescript-config/base.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/logger/*": ["./src/*"]
+    },
+    "outDir": "./dist"
+  },
+  "exclude": ["node_modules", "dist"]
+}
