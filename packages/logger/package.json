@@ -24,13 +24,5 @@
     "eslint": "^9.29.0",
     "typescript": "5.8.2",
     "vitest": "^3.2.3"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,html,md,json,jsonc,yml,yaml,toml,xml,css,postcss}": [
-      "pnpm run lint:fix"
-    ],
-    "*.{ts,tsx}": [
-      "pnpm run typecheck"
-    ]
   }
 }

@@ -37,6 +37,14 @@
       ]
     }
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,html,md,json,jsonc,yml,yaml,toml,xml,css,postcss}": [
+      "pnpm run lint:fix"
+    ],
+    "*.{ts,tsx}": [
+      "pnpm run typecheck"
+    ]
+  },
   "author": "Ouzx",
   "license": "MIT",
   "private": true,
