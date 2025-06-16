@@ -2,7 +2,7 @@
   "name": "ouzx.me",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@10.12.1",
   "author": "Ouzx",
   "license": "MIT",
   "engines": {
@@ -47,7 +47,10 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "esbuild"
+      "esbuild",
+      "workerd",
+      "sharp",
+      "@tailwindcss/oxide"
     ]
   },
   "lint-staged": {

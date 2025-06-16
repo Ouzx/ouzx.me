@@ -21,7 +21,8 @@
     "esModuleInterop": true,
     "inlineSources": false,
     "preserveWatchOutput": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "jsx": "preserve"
   },
   "exclude": [
     "node_modules",
