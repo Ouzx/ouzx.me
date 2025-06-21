@@ -15,10 +15,14 @@
     "lint": "eslint --fix ."
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.14.1",
-    "@next/eslint-plugin-next": "^15.3.3",
-    "eslint-plugin-drizzle": "^0.2.3",
-    "eslint-plugin-format": "^1.0.1",
-    "eslint-plugin-turbo": "^2.5.4"
+    "@antfu/eslint-config": "catalog:",
+    "@eslint-react/eslint-plugin": "catalog:",
+    "@next/eslint-plugin-next": "catalog:",
+    "@yorganci/eslint-plugin-tailwindcss": "catalog:",
+    "eslint-plugin-drizzle": "catalog:",
+    "eslint-plugin-format": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-react-refresh": "catalog:",
+    "eslint-plugin-turbo": "catalog:"
   }
 }
