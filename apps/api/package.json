@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "deploy": "wrangler deploy --minify",
+    "deploy": "wrangler deploy --minify --api-token ${CLOUDFLARE_API_TOKEN}",
     "dev": "wrangler dev",
     "test": "vitest",
     "lint": "eslint --fix .",
