@@ -11,6 +11,7 @@ export default function createConfig(options, ...userConfigs) {
       semi: true,
       quotes: 'single',
     },
+    pnpm: true,
     ...options,
   }, {
     rules: {

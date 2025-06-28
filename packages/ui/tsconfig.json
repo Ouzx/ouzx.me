@@ -1,0 +1,12 @@
+{
+  "extends": "@ouzx-me/typescript-config/next.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@ouzx-me/ui/*": ["./src/*"]
+    },
+    "noEmit": true
+  },
+  "include": ["."],
+  "exclude": ["node_modules"]
+}

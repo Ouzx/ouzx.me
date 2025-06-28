@@ -2,7 +2,7 @@
   "name": "ouzx.me",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@10.12.1",
   "author": "Ouzx",
   "license": "MIT",
   "engines": {
@@ -15,23 +15,24 @@
     "test": "turbo run test",
     "e2e": "turbo run e2e",
     "typecheck": "turbo run typecheck",
-    "lint": "turbo run lint -- --fix",
+    "lint": "turbo run lint --",
     "fix": "turbo run fix",
     "prepare": "husky",
     "commit": "git add -A && cz",
     "commit:stage": "cz"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.1",
+    "@commitlint/cli": "catalog:",
     "@ouzx-me/eslint-config": "workspace:*",
     "@ouzx-me/typescript-config": "workspace:*",
-    "commitizen": "^4.3.1",
-    "cz-emoji": "1.3.2-canary.2",
-    "eslint": "^9.29.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "turbo": "^2.5.4",
-    "typescript": "5.8.2"
+    "@types/node": "catalog:",
+    "commitizen": "catalog:",
+    "cz-emoji": "catalog:",
+    "eslint": "catalog:",
+    "husky": "catalog:",
+    "lint-staged": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
   },
   "config": {
     "commitizen": {
@@ -44,18 +45,5 @@
         "breaking"
       ]
     }
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,html,md,json,jsonc,yml,yaml,toml,xml,css,postcss}": [
-      "pnpm run lint --"
-    ],
-    "*.{ts,tsx}": [
-      "sh -c 'tsc --noEmit'"
-    ]
   }
 }

@@ -1,0 +1,14 @@
+{
+  "extends": "@ouzx-me/typescript-config/base.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/api/*": ["./src/*"]
+    },
+    "types": [
+      "@cloudflare/workers-types/2023-07-01"
+    ],
+    "outDir": "./dist"
+  },
+  "exclude": ["node_modules", "dist"]
+}
