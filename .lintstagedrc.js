@@ -1,3 +1,4 @@
+const fs = require('node:fs');
 const path = require('node:path');
 
 module.exports = {
@@ -17,8 +18,10 @@ module.exports = {
       }
     }
 
-    return Array.from(projectRoots).map(
-      project => `tsc --noEmit --project ${project}/tsconfig.json`,
-    );
+    return Array.from(projectRoots)
+      .filter(project => fs.existsSync(path.join(project, 'tsconfig.json')))
+      .map(
+        project => `tsc --noEmit --project ${project}/tsconfig.json`,
+      );
   },
 };
