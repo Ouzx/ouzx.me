@@ -6,9 +6,10 @@
       "@/api/*": ["./src/*"]
     },
     "types": [
-      "@cloudflare/workers-types/2023-07-01"
+      "./worker-configuration.d.ts"
     ],
-    "outDir": "./dist"
+    // Since we are using cloudflare as a runtime, we don't need to emit anything
+    "noEmit": true
   },
   "exclude": ["node_modules", "dist"]
 }
