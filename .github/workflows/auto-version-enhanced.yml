@@ -264,7 +264,7 @@ jobs:
               echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
             else
               echo "Pre-merge check. Pushing commit to PR branch without tags."
-              git push origin ${{ github.head_ref }}
+              git push origin HEAD:${{ github.head_ref }}
             fi
 
             echo "commit_msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
