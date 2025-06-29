@@ -1,0 +1,290 @@
+name: Auto Version Increment (CZ-Emoji)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: Version increment type
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+env:
+  WEB_APP_PATH: apps/web
+  API_APP_PATH: apps/api
+  PACKAGES_PATH: packages
+  # Disable pnpm update notifications
+  PNPM_SUPPRESS_UPDATE_NOTIFIER: true
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Analyze commit messages and determine version bump
+        id: analyze-commits
+        run: |
+          # Get commits from the merged PR or last 10 commits for manual trigger
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Get commits from the PR
+            COMMITS=$(git log --oneline ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          else
+            # Manual trigger - get last 10 commits excluding previous version bumps
+            COMMITS=$(git log --oneline -10 --grep="🔖 bump versions" --invert-grep)
+          fi
+
+          echo "Analyzing commits:"
+          echo "$COMMITS"
+
+          VERSION_TYPE="patch"
+
+          # Check for major version commits (breaking changes)
+          if echo "$COMMITS" | grep -E ":boom:" > /dev/null; then
+            VERSION_TYPE="major"
+            echo "Found breaking change commit (:boom:), setting to major"
+          # Check for minor version commits (new features)
+          elif echo "$COMMITS" | grep -E ":sparkles:" > /dev/null; then
+            VERSION_TYPE="minor"
+            echo "Found new feature commit (:sparkles:), setting to minor"
+          # Check for patch version commits
+          elif echo "$COMMITS" | grep -E ":zap:|:bug:|:ambulance:|:lipstick:|:lock:|:arrow_down:|:arrow_up:|:pushpin:|:chart_with_upwards_trend:|:heavy_plus_sign:|:heavy_minus_sign:|:wrench:|:globe_with_meridians:|:pencil2:|:rewind:|:package:|:alien:|:bento:|:wheelchair:|:speech_balloon:|:card_file_box:|:children_crossing:|:iphone:|:egg:|:alembic:|:mag:|:label:|:triangular_flag_on_post:|:goal_net:|:dizzy:|:wastebasket:|:passport_control:|:adhesive_bandage:|:necktie:" > /dev/null; then
+            VERSION_TYPE="patch"
+            echo "Found patch-level commit, keeping patch"
+          fi
+
+          # Override with manual input if provided
+          if [ "${{ github.event.inputs.version_type }}" != "" ]; then
+            VERSION_TYPE="${{ github.event.inputs.version_type }}"
+            echo "Manual override: $VERSION_TYPE"
+          fi
+
+          echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
+          echo "Final version bump type: $VERSION_TYPE"
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Get changed files from the PR
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          else
+            # Manual trigger - get changed files from last commit
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Save changed files to environment
+          echo "$CHANGED_FILES" > changed_files.txt
+
+      - name: Check for changes and bump versions
+        id: bump_versions
+        run: |
+          VERSION_TYPE="${{ steps.analyze-commits.outputs.version_type }}"
+          CHANGED_FILES=$(cat changed_files.txt)
+
+          # Function to bump version and output new version
+          bump_version() {
+            local app_path=$1
+            local app_name=$2
+            local version_type=$3
+
+            if [ -f "$app_path/package.json" ]; then
+              echo "Bumping $version_type version for $app_name..." >&2
+              cd "$app_path"
+
+              local current_version
+              current_version=$(node -p "require('./package.json').version")
+              echo "Current version: $current_version" >&2
+
+              pnpm version "$version_type" --no-git-tag-version >/dev/null
+              local new_version
+              new_version=$(node -p "require('./package.json').version")
+              echo "New version: $new_version" >&2
+
+              cd - > /dev/null
+              echo "$new_version"
+            else
+              echo "No package.json found in $app_path" >&2
+            fi
+          }
+
+          # Function to check if path has changes
+          has_changes() {
+            local path=$1
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              return 0  # Always bump on manual trigger
+            fi
+            echo "$CHANGED_FILES" | grep -E "^$path/" > /dev/null
+          }
+
+          WEB_CHANGED=false
+          API_CHANGED=false
+          PACKAGES_CHANGED=false
+          NEW_WEB_VERSION=""
+          NEW_API_VERSION=""
+
+          # Check for changes in packages first
+          if has_changes "$PACKAGES_PATH"; then
+            echo "Changes detected in packages"
+            PACKAGES_CHANGED=true
+
+            for package_dir in $(echo "$CHANGED_FILES" | grep -E "^$PACKAGES_PATH/" | cut -d'/' -f1-2 | sort -u); do
+              if [ -d "$package_dir" ] && [ -f "$package_dir/package.json" ]; then
+                package_name=$(basename "$package_dir")
+                bump_version "$package_dir" "package $package_name" "$VERSION_TYPE" > /dev/null
+              fi
+            done
+          fi
+
+          # Check for changes in web app
+          if has_changes "$WEB_APP_PATH"; then
+            echo "Changes detected in web app" >&2
+            NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
+            WEB_CHANGED=true
+          fi
+
+          # Check for changes in API app
+          if has_changes "$API_APP_PATH"; then
+            echo "Changes detected in API app" >&2
+            NEW_API_VERSION=$(bump_version "$API_APP_PATH" "api" "$VERSION_TYPE")
+            API_CHANGED=true
+          fi
+
+          # If packages changed, also bump apps that might depend on them
+          if [ "$PACKAGES_CHANGED" = "true" ]; then
+            echo "Package changes detected, checking app dependencies..." >&2
+
+            if [ "$WEB_CHANGED" != "true" ] && [ -f "$WEB_APP_PATH/package.json" ]; then
+              echo "Bumping web app due to package changes" >&2
+              NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
+              WEB_CHANGED=true
+            fi
+
+            if [ "$API_CHANGED" != "true" ] && [ -f "$API_APP_PATH/package.json" ]; then
+              echo "Bumping API app due to package changes" >&2
+              NEW_API_VERSION=$(bump_version "$API_APP_PATH" "api" "$VERSION_TYPE")
+              API_CHANGED=true
+            fi
+          fi
+
+          {
+            echo "WEB_CHANGED=$WEB_CHANGED";
+            echo "API_CHANGED=$API_CHANGED";
+            echo "PACKAGES_CHANGED=$PACKAGES_CHANGED";
+            echo "NEW_WEB_VERSION=$NEW_WEB_VERSION";
+            echo "NEW_API_VERSION=$NEW_API_VERSION";
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit, Tag and Push Changes
+        id: commit_push
+        run: |
+          # Check if there are any changes to commit
+          if ! git diff --quiet --exit-code; then
+            # Construct commit message
+            COMMIT_MSG="🔖 bump versions"
+            CHANGES=()
+            if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
+              CHANGES+=("web@${{ steps.bump_versions.outputs.NEW_WEB_VERSION }}")
+            fi
+            if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
+              CHANGES+=("api@${{ steps.bump_versions.outputs.NEW_API_VERSION }}")
+            fi
+            if [ "${{ steps.bump_versions.outputs.PACKAGES_CHANGED }}" = "true" ]; then
+              CHANGES+=("packages")
+            fi
+            if [ ${#CHANGES[@]} -gt 0 ]; then
+              COMMIT_MSG="$COMMIT_MSG (${CHANGES[*]})"
+            fi
+            COMMIT_MSG="$COMMIT_MSG [skip ci]"
+            echo "Commit message: $COMMIT_MSG"
+
+            # Commit changes
+            git add .
+            git commit --no-verify -m "$COMMIT_MSG"
+
+            # On merged PRs or manual dispatch, tag and push to main.
+            # For pre-merge checks, push to the branch without tags.
+            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] || [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
+              echo "Merged PR or manual dispatch detected. Tagging and pushing to main."
+
+              # Add tags
+              RELEASE_TAG=""
+              if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
+                TAG="web-v${{ steps.bump_versions.outputs.NEW_WEB_VERSION }}"
+                git tag "$TAG" -m "$TAG"
+                RELEASE_TAG=$TAG
+              fi
+              if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
+                TAG="api-v${{ steps.bump_versions.outputs.NEW_API_VERSION }}"
+                git tag "$TAG" -m "$TAG"
+                if [ -z "$RELEASE_TAG" ]; then
+                  RELEASE_TAG=$TAG
+                fi
+              fi
+
+              # Push changes and tags
+              git push origin main --follow-tags
+
+              echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+            else
+              echo "Pre-merge check. Pushing commit to PR branch without tags."
+              git push origin HEAD:${{ github.head_ref }}
+            fi
+
+            echo "commit_msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
+            echo "changes_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "No version changes to commit."
+            echo "changes_exist=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        if: steps.commit_push.outputs.changes_exist == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.commit_push.outputs.release_tag }}
+          name: Release ${{ steps.commit_push.outputs.release_tag }}
+          body: |
+            ## 🚀 Version Bump Summary
+            **Version Type:** ${{ steps.analyze-commits.outputs.version_type }} (${{ steps.analyze-commits.outputs.version_type == 'major' && '💥 Breaking' || steps.analyze-commits.outputs.version_type == 'minor' && '✨ Feature' || '🔧 Patch' }})
+
+            ${{ steps.bump_versions.outputs.WEB_CHANGED == 'true' && format('- **🌐 Web App:** v{0}', steps.bump_versions.outputs.NEW_WEB_VERSION) || '' }}
+            ${{ steps.bump_versions.outputs.API_CHANGED == 'true' && format('- **🔌 API App:** v{0}', steps.bump_versions.outputs.NEW_API_VERSION) || '' }}
+            ${{ steps.bump_versions.outputs.PACKAGES_CHANGED == 'true' && '- **📦 Packages:** Updated' || '' }}
+          prerelease: false
