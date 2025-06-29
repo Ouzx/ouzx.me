@@ -203,6 +203,9 @@ jobs:
             fi
           fi
 
+          # Clean up the temporary file
+          rm changed_files.txt
+
           {
             echo "WEB_CHANGED=$WEB_CHANGED";
             echo "API_CHANGED=$API_CHANGED";
