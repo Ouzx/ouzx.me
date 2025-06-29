@@ -14,29 +14,30 @@
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ouzx-me-db",
+      "database_id": "c2fa9ed6-9737-47fb-9907-3611cffdada4"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "bucket_name": "ouzx-me-r2",
+      "binding": "ouzx_me_r2"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "ouzx_me_kv",
+      "id": "a8701ddab849466eb7cdae02efa0cb10"
+    }
+  ]
+
   // "vars": {
   //   "MY_VAR": "my-variable"
   // },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
   // "ai": {
   //   "binding": "AI"
   // },
