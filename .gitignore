@@ -53,3 +53,5 @@ dist
 # wrangler files
 .wrangler
 .dev.vars*
+
+changed_files.txt
