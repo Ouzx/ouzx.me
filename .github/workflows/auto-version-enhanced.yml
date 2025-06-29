@@ -236,7 +236,7 @@ jobs:
 
             # Commit changes
             git add .
-            git commit -m "$COMMIT_MSG"
+            git commit --no-verify -m "$COMMIT_MSG"
 
             # On merged PRs or manual dispatch, tag and push to main.
             # For pre-merge checks, push to the branch without tags.
