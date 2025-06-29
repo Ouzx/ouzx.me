@@ -2,7 +2,7 @@ name: Auto Version Increment (CZ-Emoji)
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [closed]
     branches: [main]
   workflow_dispatch:
     inputs:
@@ -26,7 +26,7 @@ env:
 jobs:
   version-bump:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true)
     permissions:
       contents: write
       pull-requests: read
@@ -241,35 +241,25 @@ jobs:
             git add .
             git commit --no-verify -m "$COMMIT_MSG"
 
-            # On merged PRs or manual dispatch, tag and push to main.
-            # For pre-merge checks, push to the branch without tags.
-            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] || [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
-              echo "Merged PR or manual dispatch detected. Tagging and pushing to main."
-
-              # Add tags
-              RELEASE_TAG=""
-              if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
-                TAG="web-v${{ steps.bump_versions.outputs.NEW_WEB_VERSION }}"
-                git tag "$TAG" -m "$TAG"
+            # Add tags
+            RELEASE_TAG=""
+            if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
+              TAG="web-v${{ steps.bump_versions.outputs.NEW_WEB_VERSION }}"
+              git tag "$TAG" -m "$TAG"
+              RELEASE_TAG=$TAG
+            fi
+            if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
+              TAG="api-v${{ steps.bump_versions.outputs.NEW_API_VERSION }}"
+              git tag "$TAG" -m "$TAG"
+              if [ -z "$RELEASE_TAG" ]; then
                 RELEASE_TAG=$TAG
               fi
-              if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
-                TAG="api-v${{ steps.bump_versions.outputs.NEW_API_VERSION }}"
-                git tag "$TAG" -m "$TAG"
-                if [ -z "$RELEASE_TAG" ]; then
-                  RELEASE_TAG=$TAG
-                fi
-              fi
-
-              # Push changes and tags
-              git push origin main --follow-tags
-
-              echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
-            else
-              echo "Pre-merge check. Pushing commit to PR branch without tags."
-              git push origin HEAD:${{ github.head_ref }}
             fi
 
+            # Push changes and tags
+            git push origin main --follow-tags
+
+            echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
             echo "commit_msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
             echo "changes_exist=true" >> $GITHUB_OUTPUT
           else
@@ -278,7 +268,7 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        if: steps.commit_push.outputs.changes_exist == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
+        if: steps.commit_push.outputs.changes_exist == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.commit_push.outputs.release_tag }}
