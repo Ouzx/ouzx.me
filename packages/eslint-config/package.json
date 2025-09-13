@@ -18,7 +18,6 @@
     "@antfu/eslint-config": "catalog:",
     "@eslint-react/eslint-plugin": "catalog:",
     "@next/eslint-plugin-next": "catalog:",
-    "@yorganci/eslint-plugin-tailwindcss": "catalog:",
     "eslint-plugin-drizzle": "catalog:",
     "eslint-plugin-format": "catalog:",
     "eslint-plugin-react-hooks": "catalog:",
