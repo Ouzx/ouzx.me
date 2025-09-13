@@ -262,6 +262,20 @@ jobs:
             **Version Type:** ${{ steps.analyze-commits.outputs.version_type }}
           labels: automerge
 
+      - name: Checkout main branch to read new version
+        if: steps.pr-check.outputs.is_version_bump == 'true'
+        uses: actions/checkout@v4
+        with:
+          # Checks out the base branch to get the new package.json versions
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+
+      - name: Configure Git for tagging
+        if: steps.pr-check.outputs.is_version_bump == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
       - name: Create Tags
         if: steps.pr-check.outputs.is_version_bump == 'true'
         id: create-tags
