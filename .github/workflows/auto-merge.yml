@@ -17,4 +17,3 @@ jobs:
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
           MERGE_LABELS: automerge
-          DELETE_BRANCH_AFTER_MERGE: true
