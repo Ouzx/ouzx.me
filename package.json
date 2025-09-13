@@ -2,7 +2,7 @@
   "name": "ouzx.me",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.12.1",
+  "packageManager": "pnpm@10.16.0",
   "author": "Ouzx",
   "license": "MIT",
   "engines": {

@@ -50,12 +50,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Check PR type
+        id: pr-check
+        if: github.event_name == 'pull_request'
+        run: |
+          is_version_bump="false"
+          if [[ "${{ github.event.pull_request.title }}" == "🔖 bump versions"* ]]; then
+            is_version_bump="true"
+          fi
+          echo "is_version_bump=$is_version_bump" >> $GITHUB_OUTPUT
+
       - name: Configure Git
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
       - name: Analyze commit messages and determine version bump
+        if: github.event_name == 'workflow_dispatch' || steps.pr-check.outputs.is_version_bump == 'false'
         id: analyze-commits
         run: |
           # Get commits from the merged PR or last 10 commits for manual trigger
@@ -96,6 +107,7 @@ jobs:
           echo "Final version bump type: $VERSION_TYPE"
 
       - name: Get changed files
+        if: github.event_name == 'workflow_dispatch' || steps.pr-check.outputs.is_version_bump == 'false'
         id: changed-files
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -113,6 +125,7 @@ jobs:
           echo "$CHANGED_FILES" > changed_files.txt
 
       - name: Check for changes and bump versions
+        if: github.event_name == 'workflow_dispatch' || steps.pr-check.outputs.is_version_bump == 'false'
         id: bump_versions
         run: |
           VERSION_TYPE="${{ steps.analyze-commits.outputs.version_type }}"
@@ -214,70 +227,62 @@ jobs:
             echo "NEW_API_VERSION=$NEW_API_VERSION";
           } >> "$GITHUB_OUTPUT"
 
-      - name: Commit, Tag and Push Changes
-        id: commit_push
+      - name: Create Pull Request for version bump
+        if: github.event_name == 'workflow_dispatch' || steps.pr-check.outputs.is_version_bump == 'false'
+        id: create-pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          commit-message: "🔖 bump versions"
+          branch: "chore/version-bump-${{ github.run_id }}"
+          delete-branch: true
+          title: "🔖 bump versions"
+          body: |
+            Automated version bump. This PR will be merged automatically.
+            **Version Type:** ${{ steps.analyze-commits.outputs.version_type }}
+          labels: automerge
+
+      - name: Create Tags
+        if: steps.pr-check.outputs.is_version_bump == 'true'
+        id: create-tags
         run: |
-          # Check if there are any changes to commit
-          if ! git diff --quiet --exit-code; then
-            # Construct commit message
-            COMMIT_MSG="🔖 bump versions"
-            CHANGES=()
-            if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
-              CHANGES+=("web@${{ steps.bump_versions.outputs.NEW_WEB_VERSION }}")
-            fi
-            if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
-              CHANGES+=("api@${{ steps.bump_versions.outputs.NEW_API_VERSION }}")
-            fi
-            if [ "${{ steps.bump_versions.outputs.PACKAGES_CHANGED }}" = "true" ]; then
-              CHANGES+=("packages")
-            fi
-            if [ ${#CHANGES[@]} -gt 0 ]; then
-              COMMIT_MSG="$COMMIT_MSG (${CHANGES[*]})"
-            fi
-            COMMIT_MSG="$COMMIT_MSG [skip ci]"
-            echo "Commit message: $COMMIT_MSG"
-
-            # Commit changes
-            git add .
-            git commit --no-verify -m "$COMMIT_MSG"
-
-            # Add tags
-            RELEASE_TAG=""
-            if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
-              TAG="web-v${{ steps.bump_versions.outputs.NEW_WEB_VERSION }}"
-              git tag "$TAG" -m "$TAG"
+          echo "Version bump PR merged. Creating tags..."
+          WEB_VERSION=$(node -p "require('./${{ env.WEB_APP_PATH }}/package.json').version")
+          API_VERSION=$(node -p "require('./${{ env.API_APP_PATH }}/package.json').version")
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          RELEASE_TAG=""
+          if [[ "$PR_TITLE" == *"web@"* ]]; then
+            TAG="web-v$WEB_VERSION"
+            git tag "$TAG" -m "$TAG"
+            RELEASE_TAG=$TAG
+            echo "Created tag $TAG"
+          fi
+          if [[ "$PR_TITLE" == *"api@"* ]]; then
+            TAG="api-v$API_VERSION"
+            git tag "$TAG" -m "$TAG"
+            if [ -z "$RELEASE_TAG" ]; then
               RELEASE_TAG=$TAG
             fi
-            if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
-              TAG="api-v${{ steps.bump_versions.outputs.NEW_API_VERSION }}"
-              git tag "$TAG" -m "$TAG"
-              if [ -z "$RELEASE_TAG" ]; then
-                RELEASE_TAG=$TAG
-              fi
-            fi
-
-            # Push changes and tags
-            git push origin main --follow-tags
-
+            echo "Created tag $TAG"
+          fi
+          if [ -n "$RELEASE_TAG" ]; then
+            git push origin --tags
             echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
-            echo "commit_msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
-            echo "changes_exist=true" >> $GITHUB_OUTPUT
+            echo "new_web_version=$WEB_VERSION" >> $GITHUB_OUTPUT
+            echo "new_api_version=$API_VERSION" >> $GITHUB_OUTPUT
           else
-            echo "No version changes to commit."
-            echo "changes_exist=false" >> $GITHUB_OUTPUT
+            echo "No new app versions found in PR title to tag."
           fi
 
       - name: Create GitHub Release
-        if: steps.commit_push.outputs.changes_exist == 'true'
+        if: steps.pr-check.outputs.is_version_bump == 'true' && steps.create-tags.outputs.release_tag
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.commit_push.outputs.release_tag }}
-          name: Release ${{ steps.commit_push.outputs.release_tag }}
+          tag_name: ${{ steps.create-tags.outputs.release_tag }}
+          name: Release ${{ steps.create-tags.outputs.release_tag }}
           body: |
             ## 🚀 Version Bump Summary
-            **Version Type:** ${{ steps.analyze-commits.outputs.version_type }} (${{ steps.analyze-commits.outputs.version_type == 'major' && '💥 Breaking' || steps.analyze-commits.outputs.version_type == 'minor' && '✨ Feature' || '🔧 Patch' }})
-
-            ${{ steps.bump_versions.outputs.WEB_CHANGED == 'true' && format('- **🌐 Web App:** v{0}', steps.bump_versions.outputs.NEW_WEB_VERSION) || '' }}
-            ${{ steps.bump_versions.outputs.API_CHANGED == 'true' && format('- **🔌 API App:** v{0}', steps.bump_versions.outputs.NEW_API_VERSION) || '' }}
-            ${{ steps.bump_versions.outputs.PACKAGES_CHANGED == 'true' && '- **📦 Packages:** Updated' || '' }}
+            **Version Type:** ${{ github.event.pull_request.body }}
+            - **🌐 Web App:** v${{ steps.create-tags.outputs.new_web_version }}
+            - **🔌 API App:** v${{ steps.create-tags.outputs.new_api_version }}
           prerelease: false
