@@ -261,3 +261,62 @@ jobs:
             Automated version bump. This PR will be merged automatically.
             **Version Type:** ${{ steps.analyze-commits.outputs.version_type }}
           labels: automerge
+
+      - name: Checkout main branch to read new version
+        if: steps.pr-check.outputs.is_version_bump == 'true'
+        uses: actions/checkout@v4
+        with:
+          # Checks out the base branch to get the new package.json versions
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+
+      - name: Configure Git for tagging
+        if: steps.pr-check.outputs.is_version_bump == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Create Tags
+        if: steps.pr-check.outputs.is_version_bump == 'true'
+        id: create-tags
+        run: |
+          echo "Version bump PR merged. Creating tags..."
+          WEB_VERSION=$(node -p "require('./${{ env.WEB_APP_PATH }}/package.json').version")
+          API_VERSION=$(node -p "require('./${{ env.API_APP_PATH }}/package.json').version")
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          RELEASE_TAG=""
+          if [[ "$PR_TITLE" == *"web@"* ]]; then
+            TAG="web-v$WEB_VERSION"
+            git tag "$TAG" -m "$TAG"
+            RELEASE_TAG=$TAG
+            echo "Created tag $TAG"
+          fi
+          if [[ "$PR_TITLE" == *"api@"* ]]; then
+            TAG="api-v$API_VERSION"
+            git tag "$TAG" -m "$TAG"
+            if [ -z "$RELEASE_TAG" ]; then
+              RELEASE_TAG=$TAG
+            fi
+            echo "Created tag $TAG"
+          fi
+          if [ -n "$RELEASE_TAG" ]; then
+            git push origin --tags
+            echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+            echo "new_web_version=$WEB_VERSION" >> $GITHUB_OUTPUT
+            echo "new_api_version=$API_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "No new app versions found in PR title to tag."
+          fi
+
+      - name: Create GitHub Release
+        if: steps.pr-check.outputs.is_version_bump == 'true' && steps.create-tags.outputs.release_tag
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.create-tags.outputs.release_tag }}
+          name: Release ${{ steps.create-tags.outputs.release_tag }}
+          body: |
+            ## 🚀 Version Bump Summary
+            **Version Type:** ${{ github.event.pull_request.body }}
+            - **🌐 Web App:** v${{ steps.create-tags.outputs.new_web_version }}
+            - **🔌 API App:** v${{ steps.create-tags.outputs.new_api_version }}
+          prerelease: false
