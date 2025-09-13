@@ -227,16 +227,36 @@ jobs:
             echo "NEW_API_VERSION=$NEW_API_VERSION";
           } >> "$GITHUB_OUTPUT"
 
+      - name: Construct PR Title and Commit Message
+        id: construct-title
+        if: github.event_name == 'workflow_dispatch' || steps.pr-check.outputs.is_version_bump == 'false'
+        run: |
+          TITLE="🔖 bump versions"
+          CHANGES=()
+          if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
+            CHANGES+=("web@${{ steps.bump_versions.outputs.NEW_WEB_VERSION }}")
+          fi
+          if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
+            CHANGES+=("api@${{ steps.bump_versions.outputs.NEW_API_VERSION }}")
+          fi
+          if [ "${{ steps.bump_versions.outputs.PACKAGES_CHANGED }}" = "true" ]; then
+            CHANGES+=("packages")
+          fi
+          if [ ${#CHANGES[@]} -gt 0 ]; then
+            TITLE="$TITLE (${CHANGES[*]})"
+          fi
+          echo "pr_title=$TITLE" >> $GITHUB_OUTPUT
+
       - name: Create Pull Request for version bump
         if: github.event_name == 'workflow_dispatch' || steps.pr-check.outputs.is_version_bump == 'false'
         id: create-pr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          commit-message: "🔖 bump versions"
-          branch: "chore/version-bump-${{ github.run_id }}"
+          commit-message: ${{ steps.construct-title.outputs.pr_title }}
+          branch: 'chore/version-bump-${{ github.run_id }}'
           delete-branch: true
-          title: "🔖 bump versions"
+          title: ${{ steps.construct-title.outputs.pr_title }}
           body: |
             Automated version bump. This PR will be merged automatically.
             **Version Type:** ${{ steps.analyze-commits.outputs.version_type }}
