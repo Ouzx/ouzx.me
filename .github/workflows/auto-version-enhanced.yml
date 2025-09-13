@@ -245,7 +245,6 @@ jobs:
           if [ ${#CHANGES[@]} -gt 0 ]; then
             TITLE="$TITLE (${CHANGES[*]})"
           fi
-          TITLE="$TITLE [skip ci]"
           echo "pr_title=$TITLE" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request for version bump
