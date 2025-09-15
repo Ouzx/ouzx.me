@@ -16,6 +16,7 @@
     "test": "turbo run test",
     "e2e": "turbo run e2e",
     "typecheck": "turbo run typecheck",
+    "typegen": "turbo run typegen",
     "lint": "turbo run lint --",
     "fix": "turbo run fix",
     "prepare": "husky",

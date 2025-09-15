@@ -42,6 +42,10 @@
     "fix": {
       "dependsOn": ["lint", "typecheck"],
       "outputs": []
+    },
+    "typegen": {
+      "dependsOn": [],
+      "outputs": []
     }
   }
 }

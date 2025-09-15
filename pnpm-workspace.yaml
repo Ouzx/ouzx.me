@@ -1,4 +1,3 @@
-# eslint-disable pnpm/yaml-no-unused-catalog-item
 packages:
   - apps/*
   - packages/*
@@ -10,15 +9,17 @@ catalog:
   '@next/eslint-plugin-next': ^15.5.3
   '@opennextjs/cloudflare': ^1.8.2
   '@radix-ui/react-slot': ^1.2.3
+  # eslint-disable-next-line pnpm/yaml-no-unused-catalog-item
   '@tailwindcss/oxide': ^0.1.0
   '@tailwindcss/postcss': ^4.1.13
-  '@types/node': ^24.3.3
+  '@types/node': ^24.5.0
   '@types/react': ^19.1.13
   '@types/react-dom': ^19.1.9
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
   commitizen: ^4.3.1
   cz-emoji: 1.3.2-canary.2
+  # eslint-disable-next-line pnpm/yaml-no-unused-catalog-item
   esbuild: ^0.15.15
   eslint: ^9.35.0
   eslint-plugin-drizzle: ^0.2.3
@@ -37,6 +38,7 @@ catalog:
   postcss: ^8.5.6
   react: ^19.1.1
   react-dom: ^19.1.1
+  # eslint-disable-next-line pnpm/yaml-no-unused-catalog-item
   sharp: ^0.32.0
   tailwind-merge: ^3.3.1
   tailwindcss: ^4.1.13
@@ -44,8 +46,9 @@ catalog:
   tw-animate-css: ^1.3.8
   typescript: 5.9.2
   vitest: ^3.2.4
+  # eslint-disable-next-line pnpm/yaml-no-unused-catalog-item
   workerd: ^0.1.0
-  wrangler: ^4.36.0
+  wrangler: ^4.37.0
 
 onlyBuiltDependencies:
   - esbuild

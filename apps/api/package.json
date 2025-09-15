@@ -10,7 +10,7 @@
     "test": "vitest",
     "lint": "eslint --fix .",
     "typecheck": "tsc --noEmit",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
     "@ouzx-me/logger": "workspace:*",
