@@ -154,9 +154,9 @@ jobs:
             if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
               CHANGES+=("api@${{ steps.bump_versions.outputs.NEW_API_VERSION }}")
             fi
-            COMMIT_MSG="🔖 bump versions (${CHANGES[*]}) [skip ci]"
-            git commit -m "$COMMIT_MSG"
-            git push
+            COMMIT_MSG="🔖 bump versions (${CHANGES[*]})"
+            git commit --no-verify -m "$COMMIT_MSG"
+            git push --no-verify
           else
             echo "No version changes to commit."
           fi
@@ -202,7 +202,7 @@ jobs:
           fi
 
           if [ -n "$RELEASE_TAG" ]; then
-            git push origin --tags
+            git push --no-verify origin --tags
             RELEASE_NAME=""
             if [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ] && [ "${{ needs.version-bump.outputs.api-changed }}" = "true" ]; then
               RELEASE_NAME="Release web-v$WEB_VERSION, api-v$API_VERSION"
