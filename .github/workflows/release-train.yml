@@ -203,7 +203,15 @@ jobs:
 
           if [ -n "$RELEASE_TAG" ]; then
             git push origin --tags
-            echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+            RELEASE_NAME=""
+            if [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ] && [ "${{ needs.version-bump.outputs.api-changed }}" = "true" ]; then
+              RELEASE_NAME="Release web-v$WEB_VERSION, api-v$API_VERSION"
+            elif [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ]; then
+              RELEASE_NAME="Release web-v$WEB_VERSION"
+            elif [ "${{ needs.version-bump.outputs.api-changed }}" = "true" ]; then
+              RELEASE_NAME="Release api-v$API_VERSION"
+            fi
+            echo "release_name=$RELEASE_NAME" >> $GITHUB_OUTPUT
           else
             echo "No new app versions to tag."
           fi
@@ -213,7 +221,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.create-tags.outputs.release_tag }}
-          name: Release ${{ steps.create-tags.outputs.release_tag }}
+          name: ${{ steps.create-tags.outputs.release_name }}
           body: |
             ## 🚀 Version Bump Summary
             **Version Type:** ${{ needs.version-bump.outputs.version-type }}
