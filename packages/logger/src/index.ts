@@ -1,7 +1,7 @@
 import type { Logger } from 'pino';
 
 import pino from 'pino';
-import pretty from 'pino-pretty';
+// import pretty from 'pino-pretty';
 
 export type LoggerConfig = {
   level?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
@@ -28,14 +28,15 @@ const defaultConfig: LoggerConfig = {
 export function createLogger(config: Partial<LoggerConfig> = {}): Logger {
   const finalConfig = { ...defaultConfig, ...config };
 
-  const stream = finalConfig.stream ?? (
+  const stream = finalConfig.stream;
+  /* ?? (
     finalConfig.prettyPrint
       ? pretty({
           colorize: true,
           translateTime: finalConfig.customTimestamp ? 'SYS:standard' : false,
         })
       : undefined
-  );
+  ); */
 
   return pino(
     {

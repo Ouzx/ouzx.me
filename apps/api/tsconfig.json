@@ -2,14 +2,15 @@
   "extends": "@ouzx-me/typescript-config/base.json",
   "compilerOptions": {
     "baseUrl": "./",
+    "rootDir": "src",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "paths": {
       "@/api/*": ["./src/*"]
     },
-    "types": [
-      "./worker-configuration.d.ts"
-    ],
-    // Since we are using cloudflare as a runtime, we don't need to emit anything
-    "noEmit": true
+    "types": ["./worker-configuration.d.ts"],
+    "outDir": "dist"
   },
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

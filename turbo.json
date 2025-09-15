@@ -6,8 +6,12 @@
       "dependsOn": [],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
+    "package": {
+      "dependsOn": ["build"],
+      "outputs": [".open-next/**"]
+    },
     "deploy": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["package"],
       "outputs": [],
       "cache": false,
       "passThroughEnv": [
@@ -16,31 +20,40 @@
       ]
     },
     "start": {
-      "dependsOn": ["^build"],
-      "cache": false
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
+    "preview": {
+      "dependsOn": ["package"],
+      "cache": false
+    },
     "test": {
-      "cache": false,
       "outputs": [],
       "dependsOn": []
     },
     "e2e": {
-      "cache": false,
       "outputs": [],
       "dependsOn": []
     },
     "lint": {
-      "dependsOn": []
+      "dependsOn": [],
+      "outputs": []
     },
     "typecheck": {
-      "dependsOn": []
+      "dependsOn": [],
+      "outputs": []
     },
     "fix": {
       "dependsOn": ["lint", "typecheck"],
+      "outputs": []
+    },
+    "typegen": {
+      "dependsOn": [],
       "outputs": []
     }
   }
