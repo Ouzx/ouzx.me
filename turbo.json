@@ -6,8 +6,12 @@
       "dependsOn": [],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
+    "package": {
+      "dependsOn": ["build"],
+      "outputs": [".open-next/**"]
+    },
     "deploy": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["package"],
       "outputs": [],
       "cache": false,
       "passThroughEnv": [
@@ -16,12 +20,17 @@
       ]
     },
     "start": {
-      "dependsOn": ["^build"],
-      "cache": false
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
     },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "preview": {
+      "dependsOn": ["package"],
+      "cache": false
     },
     "test": {
       "outputs": [],
