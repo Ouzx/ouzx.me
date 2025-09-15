@@ -166,6 +166,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get package versions
+        id: get-versions
+        run: |
+          WEB_VERSION=$(node -p "require('./apps/web/package.json').version")
+          API_VERSION=$(node -p "require('./apps/api/package.json').version")
+          echo "web_version=$WEB_VERSION" >> $GITHUB_OUTPUT
+          echo "api_version=$API_VERSION" >> $GITHUB_OUTPUT
+
       - name: Configure Git for tagging
         run: |
           git config --local user.email "action@github.com"
@@ -174,8 +187,8 @@ jobs:
       - name: Create Tags
         id: create-tags
         run: |
-          WEB_VERSION="${{ needs.version-bump.outputs.new-web-version }}"
-          API_VERSION="${{ needs.version-bump.outputs.new-api-version }}"
+          WEB_VERSION="${{ steps.get-versions.outputs.web_version }}"
+          API_VERSION="${{ steps.get-versions.outputs.api_version }}"
           RELEASE_TAG=""
 
           if [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ]; then
@@ -210,6 +223,6 @@ jobs:
           body: |
             ## 🚀 Version Bump Summary
             **Version Type:** ${{ needs.version-bump.outputs.version-type }}
-            - **🌐 Web App:** v${{ needs.version-bump.outputs.new-web-version }}
-            - **🔌 API App:** v${{ needs.version-bump.outputs.new-api-version }}
+            - **🌐 Web App:** v${{ steps.get-versions.outputs.web_version }}
+            - **🔌 API App:** v${{ steps.get-versions.outputs.api_version }}
           prerelease: false
