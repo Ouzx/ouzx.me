@@ -25,11 +25,18 @@ jobs:
       api-changed: ${{ steps.bump_versions.outputs.API_CHANGED }}
 
     steps:
+      - name: Generate GitHub App token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.PAT_TOKEN }} # Use PAT to allow pushing to main
+          token: ${{ steps.generate-token.outputs.token }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -166,19 +173,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Get package versions
-        id: get-versions
-        run: |
-          WEB_VERSION=$(node -p "require('./apps/web/package.json').version")
-          API_VERSION=$(node -p "require('./apps/api/package.json').version")
-          echo "web_version=$WEB_VERSION" >> $GITHUB_OUTPUT
-          echo "api_version=$API_VERSION" >> $GITHUB_OUTPUT
-
       - name: Configure Git for tagging
         run: |
           git config --local user.email "action@github.com"
@@ -187,8 +181,8 @@ jobs:
       - name: Create Tags
         id: create-tags
         run: |
-          WEB_VERSION="${{ steps.get-versions.outputs.web_version }}"
-          API_VERSION="${{ steps.get-versions.outputs.api_version }}"
+          WEB_VERSION="${{ needs.version-bump.outputs.new-web-version }}"
+          API_VERSION="${{ needs.version-bump.outputs.new-api-version }}"
           RELEASE_TAG=""
 
           if [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ]; then
@@ -223,6 +217,6 @@ jobs:
           body: |
             ## 🚀 Version Bump Summary
             **Version Type:** ${{ needs.version-bump.outputs.version-type }}
-            - **🌐 Web App:** v${{ steps.get-versions.outputs.web_version }}
-            - **🔌 API App:** v${{ steps.get-versions.outputs.api_version }}
+            - **🌐 Web App:** v${{ needs.version-bump.outputs.new-web-version }}
+            - **🔌 API App:** v${{ needs.version-bump.outputs.new-api-version }}
           prerelease: false
