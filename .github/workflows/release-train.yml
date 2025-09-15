@@ -222,7 +222,7 @@ jobs:
 
             ---
 
-            ###  deployments
+            ###  Deployments
             - **🌐 Web App:** https://ouzx.me/
             - **🔌 API App:** https://api.ouzx.me/
           prerelease: false
