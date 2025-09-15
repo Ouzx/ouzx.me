@@ -41,7 +41,6 @@
     },
     "cz-emoji": {
       "skipQuestions": [
-        "issues",
         "body",
         "breaking"
       ]
