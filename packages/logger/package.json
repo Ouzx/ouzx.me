@@ -9,7 +9,7 @@
     "./utils": "./src/utils.ts"
   },
   "scripts": {
-    "test": "vitest",
+    "test": "vitest run",
     "lint": "eslint --fix .",
     "typecheck": "tsc --noEmit",
     "build": "tsc"
