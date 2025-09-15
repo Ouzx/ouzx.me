@@ -1,8 +1,9 @@
 {
   "name": "@ouzx-me/ui",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "exports": {
     "./globals.css": "./src/styles/globals.css",
     "./postcss.config": "./postcss.config.mjs",
