@@ -219,4 +219,10 @@ jobs:
             **Version Type:** ${{ needs.version-bump.outputs.version-type }}
             - **🌐 Web App:** v${{ needs.version-bump.outputs.new-web-version }}
             - **🔌 API App:** v${{ needs.version-bump.outputs.new-api-version }}
+
+            ---
+
+            ###  deployments
+            - **🌐 Web App:** https://ouzx.me/
+            - **🔌 API App:** https://api.ouzx.me/
           prerelease: false

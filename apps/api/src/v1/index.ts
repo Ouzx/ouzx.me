@@ -6,7 +6,7 @@ const v1 = createApi();
 
 v1.get('/', (c) => {
   return c.json({
-    message: 'Welcome to ouzx.me API v0.0.1 😎😎😎',
+    message: 'Welcome to ouzx.me API v0.0.1 😎',
     version: '0.0.1',
   });
 });
