@@ -24,20 +24,20 @@
       "persistent": true
     },
     "test": {
-      "cache": false,
       "outputs": [],
       "dependsOn": []
     },
     "e2e": {
-      "cache": false,
       "outputs": [],
       "dependsOn": []
     },
     "lint": {
-      "dependsOn": []
+      "dependsOn": [],
+      "outputs": []
     },
     "typecheck": {
-      "dependsOn": []
+      "dependsOn": [],
+      "outputs": []
     },
     "fix": {
       "dependsOn": ["lint", "typecheck"],
