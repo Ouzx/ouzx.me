@@ -1,0 +1,111 @@
+name: Production Release
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    branches: [prod]
+  push:
+    branches: [prod]
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request_target' &&
+      startsWith(github.event.pull_request.title, '🚀 Release')
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Generate GitHub App token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Enable auto-merge for the PR
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: gh pr merge --auto --squash "${{ github.event.pull_request.number }}"
+
+  release:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/prod' &&
+      contains(github.event.head_commit.message, '🚀 Release')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git for tagging
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Parse Version Info
+        id: parse-versions
+        run: |
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          WEB_VERSION=""
+          API_VERSION=""
+          if [[ $COMMIT_MSG =~ web@([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            WEB_VERSION=${BASH_REMATCH[1]}
+          fi
+          if [[ $COMMIT_MSG =~ api@([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            API_VERSION=${BASH_REMATCH[1]}
+          fi
+          echo "WEB_VERSION=$WEB_VERSION" >> $GITHUB_OUTPUT
+          echo "API_VERSION=$API_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Tags
+        id: create-tags
+        run: |
+          WEB_VERSION="${{ steps.parse-versions.outputs.WEB_VERSION }}"
+          API_VERSION="${{ steps.parse-versions.outputs.API_VERSION }}"
+          RELEASE_TAG=""
+          WEB_CHANGED=false
+          API_CHANGED=false
+
+          if [ -n "$WEB_VERSION" ]; then
+            TAG="web-v$WEB_VERSION"
+            git tag "$TAG" -m "$TAG"
+            RELEASE_TAG=$TAG
+            WEB_CHANGED=true
+            echo "Created tag $TAG"
+          fi
+
+          if [ -n "$API_VERSION" ]; then
+            TAG="api-v$API_VERSION"
+            git tag "$TAG" -m "$TAG"
+            if [ -z "$RELEASE_TAG" ]; then
+              RELEASE_TAG=$TAG
+            fi
+            API_CHANGED=true
+            echo "Created tag $TAG"
+          fi
+
+          echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+          echo "web_changed=$WEB_CHANGED" >> $GITHUB_OUTPUT
+          echo "api_changed=$API_CHANGED" >> $GITHUB_OUTPUT
+
+          if [ -n "$RELEASE_TAG" ]; then
+            git push --no-verify origin --tags
+          fi
+
+      - name: Create GitHub Release
+        if: steps.create-tags.outputs.release_tag
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.create-tags.outputs.release_tag }}
+          name: "Release ${{ steps.parse-versions.outputs.WEB_VERSION && format('web-v{0}', steps.parse-versions.outputs.WEB_VERSION) }}${{ (steps.parse-versions.outputs.WEB_VERSION && steps.parse-versions.outputs.API_VERSION) && ', ' || '' }}${{ steps.parse-versions.outputs.API_VERSION && format('api-v{0}', steps.parse-versions.outputs.API_VERSION) }}"
+          body: |
+            ## 🚀 Release Summary
+            ${{ steps.create-tags.outputs.web_changed == 'true' && format('- **🌐 Web App:** v{0}', steps.parse-versions.outputs.WEB_VERSION) || '' }}
+            ${{ steps.create-tags.outputs.api_changed == 'true' && format('- **🔌 API App:** v{0}', steps.parse-versions.outputs.API_VERSION) || '' }}
+          prerelease: false

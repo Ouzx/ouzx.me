@@ -100,19 +100,10 @@ jobs:
 
           WEB_CHANGED=false
           API_CHANGED=false
-          PACKAGES_CHANGED=false
           NEW_WEB_VERSION=""
           NEW_API_VERSION=""
 
-          if has_changes "$PACKAGES_PATH"; then
-            PACKAGES_CHANGED=true
-            for package_dir in $(echo "$CHANGED_FILES" | grep -E "^$PACKAGES_PATH/" | cut -d'/' -f1-2 | sort -u); do
-              if [ -d "$package_dir" ] && [ -f "$package_dir/package.json" ]; then
-                bump_version "$package_dir" "package $(basename "$package_dir")" "$VERSION_TYPE" > /dev/null
-              fi
-            done
-          fi
-
+          # Handle direct changes in applications
           if has_changes "$WEB_APP_PATH"; then
             NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
             WEB_CHANGED=true
@@ -123,15 +114,33 @@ jobs:
             API_CHANGED=true
           fi
 
-          if [ "$PACKAGES_CHANGED" = "true" ]; then
-            if [ "$WEB_CHANGED" != "true" ] && [ -f "$WEB_APP_PATH/package.json" ]; then
-              NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
-              WEB_CHANGED=true
-            fi
-            if [ "$API_CHANGED" != "true" ] && [ -f "$API_APP_PATH/package.json" ]; then
-              NEW_API_VERSION=$(bump_version "$API_APP_PATH" "api" "$VERSION_TYPE")
-              API_CHANGED=true
-            fi
+          # Handle changes in shared packages and bump dependent apps
+          CHANGED_PACKAGE_DIRS=$(echo "$CHANGED_FILES" | grep -oE "^$PACKAGES_PATH/[^/]+" | sort -u)
+
+          if [ -n "$CHANGED_PACKAGE_DIRS" ]; then
+            for pkg_dir in $CHANGED_PACKAGE_DIRS; do
+              if [ -f "$pkg_dir/package.json" ]; then
+                # Bump the package itself
+                bump_version "$pkg_dir" "package" "$VERSION_TYPE" > /dev/null
+
+                # Get package name to check for dependencies in apps
+                pkg_name=$(node -p "require('./$pkg_dir/package.json').name")
+
+                # Bump web app if it depends on the changed package and hasn't been bumped
+                if [ "$WEB_CHANGED" != "true" ] && [ -f "$WEB_APP_PATH/package.json" ] && \
+                   grep -q "\"$pkg_name\":" "$WEB_APP_PATH/package.json"; then
+                  NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
+                  WEB_CHANGED=true
+                fi
+
+                # Bump api app if it depends on the changed package and hasn't been bumped
+                if [ "$API_CHANGED" != "true" ] && [ -f "$API_APP_PATH/package.json" ] && \
+                   grep -q "\"$pkg_name\":" "$API_APP_PATH/package.json"; then
+                  NEW_API_VERSION=$(bump_version "$API_APP_PATH" "api" "$VERSION_TYPE")
+                  API_CHANGED=true
+                fi
+              fi
+            done
           fi
 
           rm changed_files.txt
@@ -161,76 +170,38 @@ jobs:
             echo "No version changes to commit."
           fi
 
-  release:
+  create-release-pr:
     runs-on: ubuntu-latest
     needs: version-bump
     if: success() && (needs.version-bump.outputs.web-changed == 'true' || needs.version-bump.outputs.api-changed == 'true')
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Generate GitHub App token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
         with:
-          fetch-depth: 0
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
 
-      - name: Configure Git for tagging
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Create Tags
-        id: create-tags
-        run: |
-          WEB_VERSION="${{ needs.version-bump.outputs.new-web-version }}"
-          API_VERSION="${{ needs.version-bump.outputs.new-api-version }}"
-          RELEASE_TAG=""
-
+          TITLE="🚀 Release"
           if [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ]; then
-            TAG="web-v$WEB_VERSION"
-            git tag "$TAG" -m "$TAG"
-            RELEASE_TAG=$TAG
-            echo "Created tag $TAG"
+            TITLE="$TITLE web@${{ needs.version-bump.outputs.new-web-version }}"
           fi
-
           if [ "${{ needs.version-bump.outputs.api-changed }}" = "true" ]; then
-            TAG="api-v$API_VERSION"
-            git tag "$TAG" -m "$TAG"
-            if [ -z "$RELEASE_TAG" ]; then
-              RELEASE_TAG=$TAG
-            fi
-            echo "Created tag $TAG"
+            TITLE="$TITLE api@${{ needs.version-bump.outputs.new-api-version }}"
           fi
 
-          if [ -n "$RELEASE_TAG" ]; then
-            git push --no-verify origin --tags
-            RELEASE_NAME=""
-            if [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ] && [ "${{ needs.version-bump.outputs.api-changed }}" = "true" ]; then
-              RELEASE_NAME="Release web-v$WEB_VERSION, api-v$API_VERSION"
-            elif [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ]; then
-              RELEASE_NAME="Release web-v$WEB_VERSION"
-            elif [ "${{ needs.version-bump.outputs.api-changed }}" = "true" ]; then
-              RELEASE_NAME="Release api-v$API_VERSION"
-            fi
-            echo "release_name=$RELEASE_NAME" >> $GITHUB_OUTPUT
-          else
-            echo "No new app versions to tag."
-          fi
-
-      - name: Create GitHub Release
-        if: steps.create-tags.outputs.release_tag
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.create-tags.outputs.release_tag }}
-          name: ${{ steps.create-tags.outputs.release_name }}
-          body: |
-            ## 🚀 Version Bump Summary
-            **Version Type:** ${{ needs.version-bump.outputs.version-type }}
-            - **🌐 Web App:** v${{ needs.version-bump.outputs.new-web-version }}
-            - **🔌 API App:** v${{ needs.version-bump.outputs.new-api-version }}
-
-            ---
-
-            ###  Deployments
-            - **🌐 Web App:** https://ouzx.me/
-            - **🔌 API App:** https://api.ouzx.me/
-          prerelease: false
+          gh pr create \
+            --base prod \
+            --head main \
+            --title "$TITLE [skip ci]" \
+            --body "Automated release PR. This PR will be automatically merged."
