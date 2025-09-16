@@ -11,7 +11,7 @@
     "lint": "eslint --fix",
     "typecheck": "tsc --noEmit",
     "deploy": "opennextjs-cloudflare deploy",
-    "preview": "opennextjs-cloudflare preview",
+    "preview": "wrangler versions upload",
     "typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts",
     "shad": "pnpm dlx shadcn@canary add"
   },
