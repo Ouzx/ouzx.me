@@ -15,7 +15,6 @@
     "binding": "ASSETS",
     "directory": ".open-next/assets"
   },
-  "workers_dev": false,
   "route": {
     "pattern": "ouzx.me",
     "custom_domain": true
