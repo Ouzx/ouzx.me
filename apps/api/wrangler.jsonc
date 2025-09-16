@@ -9,6 +9,9 @@
   "compatibility_date": "2025-09-15",
   "preview_urls": true,
   "workers_dev": true,
+  "placement": {
+    "mode": "smart"
+  },
   "compatibility_flags": [
     "nodejs_compat"
   ],
