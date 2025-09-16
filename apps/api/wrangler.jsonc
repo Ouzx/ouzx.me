@@ -7,6 +7,8 @@
   },
   "main": "src/index.ts",
   "compatibility_date": "2025-09-15",
+  "preview_urls": true,
+  "workers_dev": false,
   "compatibility_flags": [
     "nodejs_compat"
   ],
