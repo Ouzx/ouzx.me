@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "deploy": "wrangler deploy --minify",
+    "deploy": "wrangler deploy --minify --env production",
+    "preview": "wrangler deploy --minify --env preview",
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest run",

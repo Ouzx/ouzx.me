@@ -1,16 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "ouzx-me-api-v1",
   "main": "src/index.ts",
   "compatibility_date": "2025-09-15",
   "compatibility_flags": [
     "nodejs_compat"
   ],
   "workers_dev": false,
-  "route": {
-    "pattern": "api.ouzx.me",
-    "custom_domain": true
-  },
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
@@ -33,7 +28,20 @@
       "binding": "ouzx_me_kv",
       "id": "a8701ddab849466eb7cdae02efa0cb10"
     }
-  ]
+  ],
+  "env": {
+    "production": {
+      "name": "ouzx-me-api-v1",
+      "route": {
+        "pattern": "api.ouzx.me",
+        "custom_domain": true
+      }
+    },
+    "preview": {
+      "name": "ouzx-me-api-v1-preview",
+      "workers_dev": true
+    }
+  }
 
   // "vars": {
   //   "MY_VAR": "my-variable"

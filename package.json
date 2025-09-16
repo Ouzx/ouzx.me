@@ -11,6 +11,7 @@
   "scripts": {
     "build": "turbo run build",
     "deploy": "turbo run deploy",
+    "preview": "turbo run preview",
     "start": "turbo run start",
     "dev": "turbo run dev",
     "test": "turbo run test",
