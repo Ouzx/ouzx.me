@@ -100,19 +100,10 @@ jobs:
 
           WEB_CHANGED=false
           API_CHANGED=false
-          PACKAGES_CHANGED=false
           NEW_WEB_VERSION=""
           NEW_API_VERSION=""
 
-          if has_changes "$PACKAGES_PATH"; then
-            PACKAGES_CHANGED=true
-            for package_dir in $(echo "$CHANGED_FILES" | grep -E "^$PACKAGES_PATH/" | cut -d'/' -f1-2 | sort -u); do
-              if [ -d "$package_dir" ] && [ -f "$package_dir/package.json" ]; then
-                bump_version "$package_dir" "package $(basename "$package_dir")" "$VERSION_TYPE" > /dev/null
-              fi
-            done
-          fi
-
+          # Handle direct changes in applications
           if has_changes "$WEB_APP_PATH"; then
             NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
             WEB_CHANGED=true
@@ -123,15 +114,33 @@ jobs:
             API_CHANGED=true
           fi
 
-          if [ "$PACKAGES_CHANGED" = "true" ]; then
-            if [ "$WEB_CHANGED" != "true" ] && [ -f "$WEB_APP_PATH/package.json" ]; then
-              NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
-              WEB_CHANGED=true
-            fi
-            if [ "$API_CHANGED" != "true" ] && [ -f "$API_APP_PATH/package.json" ]; then
-              NEW_API_VERSION=$(bump_version "$API_APP_PATH" "api" "$VERSION_TYPE")
-              API_CHANGED=true
-            fi
+          # Handle changes in shared packages and bump dependent apps
+          CHANGED_PACKAGE_DIRS=$(echo "$CHANGED_FILES" | grep -oE "^$PACKAGES_PATH/[^/]+" | sort -u)
+
+          if [ -n "$CHANGED_PACKAGE_DIRS" ]; then
+            for pkg_dir in $CHANGED_PACKAGE_DIRS; do
+              if [ -f "$pkg_dir/package.json" ]; then
+                # Bump the package itself
+                bump_version "$pkg_dir" "package" "$VERSION_TYPE" > /dev/null
+
+                # Get package name to check for dependencies in apps
+                pkg_name=$(node -p "require('./$pkg_dir/package.json').name")
+
+                # Bump web app if it depends on the changed package and hasn't been bumped
+                if [ "$WEB_CHANGED" != "true" ] && [ -f "$WEB_APP_PATH/package.json" ] && \
+                   grep -q "\"$pkg_name\":" "$WEB_APP_PATH/package.json"; then
+                  NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
+                  WEB_CHANGED=true
+                fi
+
+                # Bump api app if it depends on the changed package and hasn't been bumped
+                if [ "$API_CHANGED" != "true" ] && [ -f "$API_APP_PATH/package.json" ] && \
+                   grep -q "\"$pkg_name\":" "$API_APP_PATH/package.json"; then
+                  NEW_API_VERSION=$(bump_version "$API_APP_PATH" "api" "$VERSION_TYPE")
+                  API_CHANGED=true
+                fi
+              fi
+            done
           fi
 
           rm changed_files.txt
