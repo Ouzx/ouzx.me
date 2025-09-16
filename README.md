@@ -133,11 +133,25 @@ TBD
 
 ### Git Workflow
 
-TBD
+- **`main` branch**: All development happens here. Open Pull Requests against `main`.
+- **`prod` branch**: This is the production branch. It's automatically kept in sync with `main` through the release train. Direct pushes are discouraged.
 
 ### Deployment
 
-TBD
+This project uses a "Release Train" model for automated deployments, powered by GitHub Actions.
+
+1.  **Developer Opens a PR to `main`**: All feature development and bug fixes are submitted as pull requests to the `main` branch. This triggers preview deployments and automated checks.
+2.  **PR is Merged to `main`**: Once a pull request is reviewed and approved, it's merged into `main`.
+3.  **Release Train is Triggered**: The merge to `main` kicks off the `release-train` GitHub Action workflow.
+    - The workflow analyzes the commit messages in the pull request to determine the correct version bump (`major`, `minor`, or `patch`).
+    - It bumps the version numbers in the `package.json` files for the affected applications (`web`, `api`).
+    - It pushes the version bump commit back to `main`.
+4.  **Automated PR to `prod`**: The workflow then automatically opens a pull request from `main` to the `prod` branch. This PR contains the new version bumps.
+5.  **Auto-Merge to `prod`**: The pull request to `prod` is automatically merged, ensuring that the `prod` branch is updated with the latest changes from `main`.
+6.  **Release and Deployment**:
+    - The merge to `prod` triggers the final step of the release train.
+    - It creates Git tags and a GitHub Release for the new version(s).
+    - Cloudflare Pages/Workers automatically detects the changes pushed to the `prod` branch and deploys the new versions of the `web` and `api` applications.
 
 ## Contributing
 
