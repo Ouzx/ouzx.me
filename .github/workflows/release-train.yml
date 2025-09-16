@@ -169,6 +169,9 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Generate GitHub App token
         id: generate-token
         uses: actions/create-github-app-token@v1
