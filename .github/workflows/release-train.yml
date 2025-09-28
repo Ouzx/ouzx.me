@@ -142,20 +142,33 @@ jobs:
 
       - name: Commit and Push Version Bump
         run: |
-          git add .
-          if ! git diff --staged --quiet; then
-            CHANGES=()
-            if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
-              CHANGES+=("web@${{ steps.bump_versions.outputs.NEW_WEB_VERSION }}")
+          # Only add specific package.json files that were actually modified
+          FILES_TO_COMMIT=()
+          if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
+            FILES_TO_COMMIT+=("$WEB_APP_PATH/package.json")
+          fi
+          if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
+            FILES_TO_COMMIT+=("$API_APP_PATH/package.json")
+          fi
+          
+          if [ ${#FILES_TO_COMMIT[@]} -gt 0 ]; then
+            git add "${FILES_TO_COMMIT[@]}"
+            if ! git diff --staged --quiet; then
+              CHANGES=()
+              if [ "${{ steps.bump_versions.outputs.WEB_CHANGED }}" = "true" ]; then
+                CHANGES+=("web@${{ steps.bump_versions.outputs.NEW_WEB_VERSION }}")
+              fi
+              if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
+                CHANGES+=("api@${{ steps.bump_versions.outputs.NEW_API_VERSION }}")
+              fi
+              COMMIT_MSG="🔖 bump versions (${CHANGES[*]})"
+              git commit --no-verify -m "$COMMIT_MSG"
+              git push --no-verify
+            else
+              echo "No version changes to commit."
             fi
-            if [ "${{ steps.bump_versions.outputs.API_CHANGED }}" = "true" ]; then
-              CHANGES+=("api@${{ steps.bump_versions.outputs.NEW_API_VERSION }}")
-            fi
-            COMMIT_MSG="🔖 bump versions (${CHANGES[*]})"
-            git commit --no-verify -m "$COMMIT_MSG"
-            git push --no-verify
           else
-            echo "No version changes to commit."
+            echo "No packages were changed, skipping commit."
           fi
 
   create-release-pr:
