@@ -8,7 +8,6 @@ on:
 env:
   WEB_APP_PATH: apps/web
   API_APP_PATH: apps/api
-  PACKAGES_PATH: packages
   PNPM_SUPPRESS_UPDATE_NOTIFIER: true
 
 jobs:
@@ -64,7 +63,7 @@ jobs:
           VERSION_TYPE="patch"
           if echo "$COMMITS" | grep -E ":boom:" > /dev/null; then
             VERSION_TYPE="major"
-          elif echo "$COMMITS" | grep -E ":sparkles:" > /dev/null; then
+          elif echo "$COMMITS" | grep -E ":sparkles:|:tada:" > /dev/null; then
             VERSION_TYPE="minor"
           fi
           echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
@@ -81,9 +80,14 @@ jobs:
           VERSION_TYPE="${{ steps.analyze-commits.outputs.version_type }}"
           CHANGED_FILES=$(cat changed_files.txt)
 
-          # Exit early if no relevant files have been changed
-          if ! echo "$CHANGED_FILES" | grep -qE "^($WEB_APP_PATH/|$API_APP_PATH/|$PACKAGES_PATH/)"; then
-            echo "No changes in web, api, or packages. Skipping version bump."
+          # Exit early if no app directory changes (Requirement 1.3: no version bump for non-app changes)
+          echo "--- Debug: Changed Files ---"
+          echo "${CHANGED_FILES}"
+          echo "----------------------------"
+          if echo "${CHANGED_FILES}" | grep -qE "^(${WEB_APP_PATH}/|${API_APP_PATH}/)"; then
+            echo "App directory changes detected. Proceeding with version check."
+          else
+            echo "No changes in app directories. Skipping version bump (will still deploy)."
             {
               echo "WEB_CHANGED=false";
               echo "API_CHANGED=false";
@@ -105,6 +109,7 @@ jobs:
             fi
           }
 
+          # Check if specific app directory has changes
           has_changes() {
             local path=$1
             echo "$CHANGED_FILES" | grep -E "^$path/" > /dev/null
@@ -115,7 +120,7 @@ jobs:
           NEW_WEB_VERSION=""
           NEW_API_VERSION=""
 
-          # Handle direct changes in applications
+          # Only bump versions when app directories have changes (Requirements 1.1, 1.2)
           if has_changes "$WEB_APP_PATH"; then
             NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
             WEB_CHANGED=true
@@ -124,35 +129,6 @@ jobs:
           if has_changes "$API_APP_PATH"; then
             NEW_API_VERSION=$(bump_version "$API_APP_PATH" "api" "$VERSION_TYPE")
             API_CHANGED=true
-          fi
-
-          # Handle changes in shared packages and bump dependent apps
-          CHANGED_PACKAGE_DIRS=$(echo "$CHANGED_FILES" | grep -oE "^$PACKAGES_PATH/[^/]+" | sort -u)
-
-          if [ -n "$CHANGED_PACKAGE_DIRS" ]; then
-            for pkg_dir in $CHANGED_PACKAGE_DIRS; do
-              if [ -f "$pkg_dir/package.json" ]; then
-                # Bump the package itself
-                bump_version "$pkg_dir" "package" "$VERSION_TYPE" > /dev/null
-
-                # Get package name to check for dependencies in apps
-                pkg_name=$(node -p "require('./$pkg_dir/package.json').name")
-
-                # Bump web app if it depends on the changed package and hasn't been bumped
-                if [ "$WEB_CHANGED" != "true" ] && [ -f "$WEB_APP_PATH/package.json" ] && \
-                   grep -q "\"$pkg_name\":" "$WEB_APP_PATH/package.json"; then
-                  NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
-                  WEB_CHANGED=true
-                fi
-
-                # Bump api app if it depends on the changed package and hasn't been bumped
-                if [ "$API_CHANGED" != "true" ] && [ -f "$API_APP_PATH/package.json" ] && \
-                   grep -q "\"$pkg_name\":" "$API_APP_PATH/package.json"; then
-                  NEW_API_VERSION=$(bump_version "$API_APP_PATH" "api" "$VERSION_TYPE")
-                  API_CHANGED=true
-                fi
-              fi
-            done
           fi
 
           rm changed_files.txt
@@ -185,7 +161,7 @@ jobs:
   create-release-pr:
     runs-on: ubuntu-latest
     needs: version-bump
-    if: success() && (needs.version-bump.outputs.web-changed == 'true' || needs.version-bump.outputs.api-changed == 'true')
+    if: success()
     permissions:
       contents: write
       pull-requests: write
@@ -204,12 +180,19 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          TITLE="🚀 Release"
-          if [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ]; then
-            TITLE="$TITLE web@${{ needs.version-bump.outputs.new-web-version }}"
-          fi
-          if [ "${{ needs.version-bump.outputs.api-changed }}" = "true" ]; then
-            TITLE="$TITLE api@${{ needs.version-bump.outputs.new-api-version }}"
+          # Check if any versions were bumped
+          if [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ] || [ "${{ needs.version-bump.outputs.api-changed }}" = "true" ]; then
+            # Create title with version information
+            TITLE="🚀 Release"
+            if [ "${{ needs.version-bump.outputs.web-changed }}" = "true" ]; then
+              TITLE="$TITLE web@${{ needs.version-bump.outputs.new-web-version }}"
+            fi
+            if [ "${{ needs.version-bump.outputs.api-changed }}" = "true" ]; then
+              TITLE="$TITLE api@${{ needs.version-bump.outputs.new-api-version }}"
+            fi
+          else
+            # Generic title when no versions are bumped
+            TITLE="🚀 Deploy changes"
           fi
 
           gh pr create \
