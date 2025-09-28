@@ -83,10 +83,26 @@ jobs:
           # Exit early if no app directory changes (Requirement 1.3: no version bump for non-app changes)
           echo "--- Debug: Changed Files ---"
           echo "${CHANGED_FILES}"
+          echo "--- Debug: Environment Variables ---"
+          echo "WEB_APP_PATH: ${WEB_APP_PATH}"
+          echo "API_APP_PATH: ${API_APP_PATH}"
           echo "----------------------------"
-          if echo "${CHANGED_FILES}" | grep -qE "^(${WEB_APP_PATH}/|${API_APP_PATH}/)"; then
-            echo "App directory changes detected. Proceeding with version check."
-          else
+          
+          # Check for app directory changes more explicitly
+          WEB_HAS_CHANGES=false
+          API_HAS_CHANGES=false
+          
+          if echo "${CHANGED_FILES}" | grep -qE "^${WEB_APP_PATH}/"; then
+            WEB_HAS_CHANGES=true
+            echo "Web app changes detected"
+          fi
+          
+          if echo "${CHANGED_FILES}" | grep -qE "^${API_APP_PATH}/"; then
+            API_HAS_CHANGES=true
+            echo "API app changes detected"
+          fi
+          
+          if [ "$WEB_HAS_CHANGES" = "false" ] && [ "$API_HAS_CHANGES" = "false" ]; then
             echo "No changes in app directories. Skipping version bump (will still deploy)."
             {
               echo "WEB_CHANGED=false";
@@ -96,6 +112,8 @@ jobs:
             } >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          
+          echo "App directory changes detected. Proceeding with version check."
 
           bump_version() {
             local app_path=$1
@@ -109,26 +127,24 @@ jobs:
             fi
           }
 
-          # Check if specific app directory has changes
-          has_changes() {
-            local path=$1
-            echo "$CHANGED_FILES" | grep -E "^$path/" > /dev/null
-          }
-
           WEB_CHANGED=false
           API_CHANGED=false
           NEW_WEB_VERSION=""
           NEW_API_VERSION=""
 
           # Only bump versions when app directories have changes (Requirements 1.1, 1.2)
-          if has_changes "$WEB_APP_PATH"; then
+          if [ "$WEB_HAS_CHANGES" = "true" ]; then
+            echo "Bumping web version..."
             NEW_WEB_VERSION=$(bump_version "$WEB_APP_PATH" "web" "$VERSION_TYPE")
             WEB_CHANGED=true
+            echo "Web version bumped to: $NEW_WEB_VERSION"
           fi
 
-          if has_changes "$API_APP_PATH"; then
+          if [ "$API_HAS_CHANGES" = "true" ]; then
+            echo "Bumping API version..."
             NEW_API_VERSION=$(bump_version "$API_APP_PATH" "api" "$VERSION_TYPE")
             API_CHANGED=true
+            echo "API version bumped to: $NEW_API_VERSION"
           fi
 
           rm changed_files.txt
