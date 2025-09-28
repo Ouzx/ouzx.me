@@ -81,6 +81,18 @@ jobs:
           VERSION_TYPE="${{ steps.analyze-commits.outputs.version_type }}"
           CHANGED_FILES=$(cat changed_files.txt)
 
+          # Exit early if no relevant files have been changed
+          if ! echo "$CHANGED_FILES" | grep -qE "^($WEB_APP_PATH/|$API_APP_PATH/|$PACKAGES_PATH/)"; then
+            echo "No changes in web, api, or packages. Skipping version bump."
+            {
+              echo "WEB_CHANGED=false";
+              echo "API_CHANGED=false";
+              echo "NEW_WEB_VERSION=";
+              echo "NEW_API_VERSION=";
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           bump_version() {
             local app_path=$1
             local version_type=$3
@@ -203,5 +215,5 @@ jobs:
           gh pr create \
             --base prod \
             --head main \
-            --title "$TITLE [skip ci]" \
+            --title "$TITLE" \
             --body "Automated release PR. This PR will be automatically merged."
